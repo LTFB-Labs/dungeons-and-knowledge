@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>D&amp;K: Подземия и знания</title>
+  <meta name="description" content="Игра на ходове в подземие от кубчета: сандъци със задачи, пазител с въпроси, инвентар и горен свят.">
+  <meta property="og:title" content="D&amp;K: Подземия и знания">
+  <meta property="og:description" content="Игра от LevAcademy: подземие от кубчета, в което задачите са зад сандъци и врати.">
+  <meta property="og:image" content="icon.svg">
+  <meta name="theme-color" content="#1b1712">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=Rubik:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <!-- Opened alone. Inside LevAcademy academy-app.js starts the game instead. -->
+  <main id="game"><noscript>Играта има нужда от JavaScript.</noscript></main>
+  <script type="module">
+    import { startGame } from './game.js';
+    startGame(document.getElementById('game'));
+  </script>
+</body>
+</html>

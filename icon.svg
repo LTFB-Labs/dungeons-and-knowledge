@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" shape-rendering="crispEdges">
+  <rect width="128" height="128" rx="28" fill="#1b1712"/>
+  <rect x="8" y="8" width="26" height="26" fill="#5d5a4c" opacity=".55"/>
+  <rect x="36" y="8" width="26" height="26" fill="#6b6857" opacity=".55"/>
+  <rect x="64" y="8" width="26" height="26" fill="#545144" opacity=".55"/>
+  <rect x="92" y="8" width="26" height="26" fill="#77735f" opacity=".55"/>
+  <rect x="8" y="36" width="26" height="26" fill="#77735f" opacity=".55"/>
+  <rect x="36" y="36" width="26" height="26" fill="#5d5a4c" opacity=".55"/>
+  <rect x="64" y="36" width="26" height="26" fill="#6b6857" opacity=".55"/>
+  <rect x="92" y="36" width="26" height="26" fill="#545144" opacity=".55"/>
+  <rect x="8" y="64" width="26" height="26" fill="#545144" opacity=".55"/>
+  <rect x="36" y="64" width="26" height="26" fill="#77735f" opacity=".55"/>
+  <rect x="64" y="64" width="26" height="26" fill="#5d5a4c" opacity=".55"/>
+  <rect x="92" y="64" width="26" height="26" fill="#6b6857" opacity=".55"/>
+  <rect x="8" y="92" width="26" height="26" fill="#6b6857" opacity=".55"/>
+  <rect x="36" y="92" width="26" height="26" fill="#545144" opacity=".55"/>
+  <rect x="64" y="92" width="26" height="26" fill="#77735f" opacity=".55"/>
+  <rect x="92" y="92" width="26" height="26" fill="#5d5a4c" opacity=".55"/>
+  <rect x="30" y="64" width="68" height="40" fill="#8a5a34"/>
+  <rect x="30" y="64" width="68" height="6" fill="#a8703f"/>
+  <rect x="26" y="48" width="76" height="20" fill="#6e4426"/>
+  <rect x="26" y="48" width="76" height="5" fill="#8a5a34"/>
+  <rect x="40" y="48" width="8" height="56" fill="#f2b01e"/>
+  <rect x="80" y="48" width="8" height="56" fill="#f2b01e"/>
+  <rect x="58" y="62" width="12" height="14" fill="#ffd35a"/>
+  <rect x="62" y="67" width="4" height="5" fill="#3a2719"/>
+  <rect x="56" y="18" width="16" height="16" fill="#b07cff" transform="rotate(45 64 26)"/>
+  <rect x="60" y="22" width="8" height="8" fill="#e4d4ff" transform="rotate(45 64 26)"/>
+</svg>

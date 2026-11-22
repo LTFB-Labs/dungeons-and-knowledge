@@ -1,0 +1,10 @@
+{
+  "id": "dungeons-and-knowledge",
+  "name": "D&K: Подземия и знания",
+  "description": "Подземие от кубчета на ходове: отваряй сандъци със задачи, отговаряй на пазителя и излез в горния свят.",
+  "icon": "icon.svg",
+  "route": "dungeons-and-knowledge",
+  "contract": 2,
+  "permissions": ["settings"],
+  "entry": "academy-app.js"
+}

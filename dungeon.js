@@ -7,12 +7,13 @@ const MAP = PLACE === 'surface' ? 'surface' : 'dungeon';
 const CAME_DOWN = PLACE === 'from-surface';     // came in through the cave, down the stairs
 document.body.classList.toggle('is-surface', MAP === 'surface');
 import { createGame, TASK, DIAL_SIZE, formatNumber, segmentShare, chipById } from './chest-task.js';
+import { paintStone } from './own-stone.js';
 
 // D&K: Dungeons and Knowledge. A dungeon and the land above it, made only of boxes, light and glow.
 // Grown out of the look study in ideas/razseyaniyat-schetovoditel-looks/dungeon.html.
 
 const TEXT = {
-  hint: 'Щракни плочка (двоен клик: бързо) или ходи със стрелките или WASD (Shift: бързо, E: отвори). Колелцето приближава.',
+  hint: 'Щракни плочка (двоен клик: бързо). Или ↑ напред, ← → завой, ↓ кръгом (Shift: бързо, E: отвори). Колелцето приближава.',
   hintShoot: 'В ръката ти е нещо, което стреля: интервалът (или десен клик) стреля към показалеца.',
   styleFlat: 'Вид: гладки кубчета',
   styleTextured: 'Вид: с текстури',
@@ -581,9 +582,12 @@ const stoneMap = ({ light, mid, dark, step = mid }) => ({
 });
 const STONE_KINDS = ['bricks', 'bricksB', 'mossy', 'mossyB', 'cracked', 'cobble', 'cobbleB', 'stone', 'stoneB',
   'dark', 'darkB', 'night', 'nightB', 'tile', 'tileSide', 'deep'];
-// The stone the code paints. (The study also had stone cut from a bought-in tileset picture; it is not ours to publish.)
+// The stone: the owner's choice, light and quieter. It is cut from someone else's tileset (stone-sample.js), so it is
+// used only where that file is (at home); publish.sh leaves it out until there is a licence, and the published game
+// paints its own stone in the same spirit (own-stone.js).
+const CHOSEN = await import('./stone-sample.js').then((module) => module.SAMPLE.pale, () => null);
 const STONE_SETS = [
-  { label: 'Камък', maps: Object.fromEntries(STONE_KINDS.map((name) => [name, BLOCK_TEXTURE[name]])) },
+  { label: 'Камък', maps: stoneMap(family(quieter(CHOSEN ?? paintStone().pale, 0.5), CHOSEN ? 500 : 600)) },
 ];
 let stoneSet = 0;
 function setStone(index) {
@@ -2104,6 +2108,7 @@ function go() {
     walk.open = open;
     walk.passed = 0;
     walk.pace = walkPace();
+    keyHeading = null;
     walk.byKeys = false;
   } else if (path.length) {
     walk = { steps: [...path], from: tilePos(heroTile), to: null, t: 0, open, passed: 0, pace: walkPace() };
@@ -2987,42 +2992,35 @@ function tornEdge(seed, depth) {
 });
 
 // ---------- walking with the keyboard ----------
-// The arrows or WASD walk him one tile at a time, for as long as they are held; two at once walk slanting.
-// Each key points the way it does on the screen: up is up-right along the floor, right is down-right,
-// down is down-left, left is up-left. A short tap while he faces elsewhere only turns him on the spot.
-// Shift hurries. E uses what he stands next to, the thing in front of him first.
-const KEY_DIRS = {
-  ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1],
-  ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0],
-};
-const TURN_HOLD = 0.15;          // seconds a key must be held, when he faces elsewhere, before he walks
+// As if from inside the hero, whichever way he faces: ↑ (or W) walks forward for as long as it is held,
+// ← and → (A, D) turn him an eighth of a turn on the spot, ↓ (S) turns him round. Shift hurries.
+// E uses what he stands next to, the thing in front of him first.
+const FORWARD = new Set(['ArrowUp', 'KeyW']);
+const TURNS = { ArrowLeft: 1, KeyA: 1, ArrowRight: -1, KeyD: -1, ArrowDown: 4, KeyS: 4 };    // in eighths of a turn
+const EIGHTH = Math.PI / 4;
 const keysDown = new Set();
-let keyHold = 0;
+let keyHeading = null;           // the way the keys have turned him; null: the way he faces
 const hurrying = () => keysDown.has('ShiftLeft') || keysDown.has('ShiftRight');
-function keyDir() {
-  let di = 0;
-  let dj = 0;
-  for (const code of keysDown) if (KEY_DIRS[code]) { di += KEY_DIRS[code][0]; dj += KEY_DIRS[code][1]; }
-  return [Math.sign(di), Math.sign(dj)];
+const heading = () => keyHeading ?? Math.round((faceGoal ?? hero.rotation.y) / EIGHTH) * EIGHTH;
+function turnBy(eighths) {
+  keyHeading = heading() + eighths * EIGHTH;
+  if (!walk) faceGoal = keyHeading;            // while walking he turns at the end of the step
 }
-// The tile the held keys point to, if he can step there; a slanting step does not cut a corner.
+// The tile in front of him, if he can step there; a slanting step does not cut a corner.
 function nextKeyStep(from) {
-  const [di, dj] = keyDir();
-  if (!di && !dj) return null;
+  if (![...FORWARD].some((code) => keysDown.has(code))) return null;
+  const a = heading();
+  const di = Math.round(Math.sin(a));
+  const dj = Math.round(Math.cos(a));
   const to = { i: from.i + di, j: from.j + dj };
   const ok = walkable(to.i, to.j) && (!di || !dj || (walkable(from.i + di, from.j) && walkable(from.i, from.j + dj)));
   return ok ? to : null;
 }
-function keyWalk(dt) {
+function keyWalk() {
+  if (!walk && faceGoal === null) keyHeading = null;      // settled: he faces where he faces (a click or a shot may have turned him)
   if (closeUp || walk) return;
-  const [di, dj] = keyDir();
-  if (!di && !dj) { keyHold = 0; return; }
-  const angle = Math.atan2(di, dj);
-  const off = Math.abs(Math.atan2(Math.sin(angle - hero.rotation.y), Math.cos(angle - hero.rotation.y)));
-  keyHold += dt;
-  if (off > 0.35 && keyHold < TURN_HOLD) { faceGoal = angle; return; }
   const next = nextKeyStep(heroTile);
-  if (!next) { faceGoal = angle; return; }                  // a wall: he only turns to it
+  if (!next) return;
   clearSelection();
   walk = { steps: [next], from: tilePos(heroTile), to: null, t: 0, open: null, passed: 0, pace: hurrying() ? hurryPace() : walkPace(), byKeys: true };
 }
@@ -3036,16 +3034,16 @@ function useInFront() {
   if (id) arrive(id);
 }
 window.addEventListener('keydown', (e) => {
-  if (KEY_DIRS[e.code]) {
-    e.preventDefault();
-    if (walk && !walk.byKeys && !closeUp) {                // the keys take over from a click: he stops at the next tile
-      walk.steps = [];
-      walk.open = null;
-      walk.byKeys = true;
-      clearSelection();
-    }
-  }
+  if (e.code.startsWith('Arrow')) e.preventDefault();
   keysDown.add(e.code);
+  if (closeUp) return;
+  if (FORWARD.has(e.code) && walk && !walk.byKeys) {     // the keys take over from a click: he stops at the next tile
+    walk.steps = [];
+    walk.open = null;
+    walk.byKeys = true;
+    clearSelection();
+  }
+  if (e.code in TURNS && !e.repeat) turnBy(TURNS[e.code]);
   if (e.code === 'KeyE') useInFront();
 });
 window.addEventListener('keyup', (e) => keysDown.delete(e.code));
@@ -3174,7 +3172,7 @@ function frame() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = clock.elapsedTime;
 
-  keyWalk(dt);
+  keyWalk();
   if (walk) { faceGoal = null; stepHero(dt); }
   if (faceGoal !== null) {
     const turn = Math.atan2(Math.sin(faceGoal - hero.rotation.y), Math.cos(faceGoal - hero.rotation.y));

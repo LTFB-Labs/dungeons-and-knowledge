@@ -1,0 +1,94 @@
+{
+  "image": "hero.png",
+  "scale": 1,
+  "size": [
+    64,
+    67
+  ],
+  "parts": {
+    "legL.thigh": [
+      0,
+      0
+    ],
+    "legL.shin": [
+      13,
+      0
+    ],
+    "legL.ankle": [
+      26,
+      0
+    ],
+    "legL.foot": [
+      37,
+      0
+    ],
+    "legR.thigh": [
+      0,
+      9
+    ],
+    "legR.shin": [
+      13,
+      9
+    ],
+    "legR.ankle": [
+      26,
+      9
+    ],
+    "legR.foot": [
+      37,
+      9
+    ],
+    "shorts": [
+      0,
+      18
+    ],
+    "torso": [
+      25,
+      18
+    ],
+    "neck": [
+      50,
+      18
+    ],
+    "armL.upper": [
+      0,
+      30
+    ],
+    "armL.fore": [
+      13,
+      30
+    ],
+    "armL.hand": [
+      24,
+      30
+    ],
+    "armR.upper": [
+      37,
+      30
+    ],
+    "armR.fore": [
+      50,
+      30
+    ],
+    "armR.hand": [
+      0,
+      38
+    ],
+    "head": [
+      13,
+      38
+    ],
+    "hair.top": [
+      0,
+      53
+    ],
+    "hair.back": [
+      33,
+      53
+    ],
+    "hair.fringe": [
+      0,
+      64
+    ]
+  }
+}

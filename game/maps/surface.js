@@ -1,4 +1,4 @@
-// The surface map, as a matrix. One character is one tile.
+// The land above the dungeon, as a matrix. One character is one tile.
 // The first row is the far side of the world (z = 0); the first character of a row is x = 0.
 // Change a character and the world changes: nothing else describes this map.
 //
@@ -10,7 +10,9 @@
 //   w  well                  s  market stall counter      y  hay bale             Y  two hay bales
 //   P  shed post             S  under the shed roof       Z  hay under the shed
 //   f  field with crops      h  hedge                     k  signpost             l  lamp post
-export const SURFACE_MAP = [
+import { rock, tree, house, shed } from '../structures.js';
+
+const ROWS = [
   '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',
   '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',
   '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^',
@@ -98,3 +100,58 @@ export const SURFACE_MAP = [
   '^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
   '^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
 ];
+const caveZ = ROWS.findIndex((row) => row.includes('C'));      // the cave mouth: where the hero comes out
+const caveX = ROWS[caveZ].indexOf('C');
+const EDGE = 20;        // the land is ringed by 20 tiles of mountains and water: the view never reaches the end of the map
+
+export const SURFACE = {
+  name: 'surface',
+  rows: ROWS,
+  ground: 'grass',
+  // What each character is: the ground block, whether it can be walked on, and what stands on it.
+  // stack: [level, kind of block, how much of the cell it fills]. grow: a small builder from structures.js.
+  legend: {
+    '.': { ground: 'grass', walk: true },
+    ',': { ground: 'grass', walk: true, thing: 'flowers' },
+    p: { ground: 'dirt', walk: true, road: true },
+    '~': { ground: 'water', top: 0.82 },
+    b: { ground: 'sand', walk: true },
+    f: { ground: 'crop', walk: true },
+    '=': { ground: 'cobble', grow: 'rock', height: 2, cap: 'grass' },
+    '#': { ground: 'cobble', grow: 'rock', height: 3, cap: 'grass' },
+    '^': { ground: 'cobble', grow: 'rock', height: 4, extra: 3, cap: 'stone' },
+    C: { ground: 'dirt', walk: true, road: true, stack: [[2.5, 'grass']] },      // the roof over the tunnel
+    c: { ground: 'dirt', walk: true, stack: [[2.5, 'grass']] },
+    T: { ground: 'grass', grow: 'tree' },
+    t: { ground: 'grass', stack: [[0.5, 'leaves', 0.7]] },
+    h: { ground: 'grass', stack: [[0.5, 'leaves', 0.6]] },
+    w: { ground: 'grass', stack: [[0.5, 'well', 0.7]], thing: 'well' },
+    s: { ground: 'dirt', stack: [[0.5, 'planks', 0.6]], thing: 'stall' },
+    y: { ground: 'grass', stack: [[0.5, 'hay']] },
+    Y: { ground: 'grass', stack: [[0.5, 'hay'], [1.5, 'hay']] },
+    Z: { ground: 'dirt', stack: [[0.5, 'hay']] },
+    P: { ground: 'dirt', stack: [[0.5, 'log'], [1.5, 'log']] },
+    S: { ground: 'dirt', walk: true },
+    H: { ground: 'dirt' }, L: { ground: 'dirt' }, D: { ground: 'dirt' }, O: { ground: 'dirt' },
+    k: { ground: 'grass', thing: 'sign', blocked: true },
+    l: { ground: 'grass', thing: 'lamp', blocked: true },
+  },
+  growers: { rock, tree, house, shed },
+  structures: [{ chars: 'HLDO', build: 'house' }, { chars: 'PSZ', build: 'shed' }],      // every connected patch is one building
+  // shade: the dice for how bright each block is; look: for which of its two pictures a stone wears; things: for
+  // the things. The last two go on from where the dungeon's old builder stopped, so the land looks as it always did.
+  seeds: { shade: 23, look: -786692456, things: 1993014840 },
+  offRoad: 1.3,                 // a step off the dirt path costs this much more: the hero likes the road
+  fog: { room: { light: 1, explored: true } },
+  view: { minX: EDGE, maxX: ROWS[0].length - 1 - EDGE, minZ: EDGE, maxZ: ROWS.length - 1 - EDGE },
+  camera: { follow: true },
+  backdrop: 'sky',
+  // He comes out of the cave: from inside the mouth, two steps out, then the door shuts behind him.
+  start: { tile: [caveX, caveZ], at: [caveX, 0, caveZ - 0.3], facing: 0, walkOut: [[caveX, caveZ + 1], [caveX, caveZ + 2]], look: [caveX, 0.9, caveZ + 1] },
+  // The things. What the map itself places (flowers, well, stall, sign, lamp) is made from its characters.
+  things: [
+    { kind: 'dayLight' },
+    { kind: 'caveDoor', id: 'cave', x: caveX, z: caveZ, travel: 'from-surface',
+      tiles: [[caveX, caveZ]], front: [caveX, caveZ + 1], focus: [caveX, 1, caveZ + 0.4], hit: [1.1, 2.0, 0.8, caveX, 1.0, caveZ + 0.2] },
+  ],
+};

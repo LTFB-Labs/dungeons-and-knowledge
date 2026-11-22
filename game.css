@@ -64,13 +64,19 @@
   .answers button.is-wrong { background: var(--red); box-shadow: inset 0 3px 0 rgba(255, 255, 255, .2), 0 4px 0 var(--red-dark); filter: none; }
   [hidden] { display: none !important; }
   /* what the things in his hands can shoot: one square each, above the hint */
-  .actions { position: fixed; left: 50%; bottom: 76px; transform: translateX(-50%); display: flex; gap: 10px; z-index: 5; transition: opacity .25s; }
+  .actions { position: fixed; left: 50%; bottom: 88px; transform: translateX(-50%); display: flex; gap: 10px; z-index: 5; transition: opacity .25s; }
   body.is-closeup .actions { opacity: 0; pointer-events: none; }
   .actions .action { position: relative; width: 66px; height: 66px; min-height: 0; padding: 0; display: grid; place-items: center;
     background: #fffaf0; border: 3px solid #b79a70; border-radius: 8px; box-shadow: 0 4px 0 #8a6f4c; color: var(--ink-brown); }
   .actions .action.is-on { border-color: var(--yellow); box-shadow: 0 4px 0 var(--yellow-dark), 0 0 0 3px rgba(242, 182, 50, .35); }
   .actions .action img { width: 40px; height: 40px; image-rendering: pixelated; margin-top: -8px; pointer-events: none; }
   .actions .action b { position: absolute; left: 0; right: 0; bottom: 3px; font-size: 10px; letter-spacing: .03em; text-align: center; pointer-events: none; }
+  /* a painted tile: the picture is the whole square, the name or key sits under it */
+  .actions .action.has-tile { background: none; border: 0; box-shadow: none; overflow: visible; }
+  .actions .action.has-tile:not(.is-on) { opacity: .72; }
+  .actions .action.has-tile img { width: 66px; height: 66px; margin: 0; image-rendering: auto; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .45)); transition: transform .15s; }
+  .actions .action.has-tile.is-on img { transform: translateY(-3px); filter: drop-shadow(0 0 7px rgba(255, 214, 90, .85)) drop-shadow(0 3px 0 rgba(0, 0, 0, .45)); }
+  .actions .action.has-tile b { bottom: -17px; color: #fff3d6; font-size: 11px; text-shadow: 0 1px 0 #000, 0 0 4px #000; }
   .left { display: flex; gap: 8px; flex-wrap: wrap; }
 
   /* The task sheet: parchment with a wooden name board, stone tablets for numbers, a brass lock. */
@@ -283,6 +289,23 @@
     #inv .slot-i { width: 34px; height: 34px; border-width: 2px; }
     .slot-i img { width: 26px; height: 26px; }
   }
+  /* ---- the settings: a narrow sheet at the side, so the picture stays in view while a slider is moved ---- */
+  #settings { left: auto; right: 212px; bottom: auto; top: 84px; width: min(340px, calc(100% - 32px)); transform: translateX(130%); z-index: 6; }
+  body.is-settings #settings { transform: none; visibility: visible; transition-delay: 0s; }
+  #settings-list { max-height: calc(100vh - 230px); overflow-y: auto; padding-right: 6px; }
+  .setting { display: grid; grid-template-columns: 1fr auto; gap: 0 8px; align-items: baseline; margin: 0 0 8px; font-size: 14px; font-weight: 700; }
+  .setting b { color: var(--red-dark); }
+  .setting input { grid-column: 1 / -1; width: 100%; margin: 2px 0 0; accent-color: var(--teal); cursor: pointer; }
+  .setting input[type="checkbox"] { grid-column: auto; width: 20px; height: 20px; margin: 0; align-self: center; }
+  @media (max-width: 700px) { #settings { right: 16px; } }
+  .fps { min-height: 30px; padding-top: 3px; padding-bottom: 3px; font-size: 12px; align-self: flex-start; white-space: nowrap; }
+  /* ---- the small map: a wooden frame in the corner, dark and a little see-through inside ---- */
+  #minimap {
+    inset: 68px 12px auto auto; width: 180px; height: 180px; cursor: default; pointer-events: none;
+    background: rgba(14, 12, 10, .55); border: 4px solid var(--wood); border-radius: 5px 8px 6px 9px / 7px 5px 8px 6px;
+    box-shadow: inset 0 0 0 2px var(--wood-dark), 0 0 0 2px var(--wood-dark), 0 5px 0 rgba(0, 0, 0, .4); transition: opacity .3s;
+  }
+  body.is-closeup #minimap { opacity: 0; }
   body.is-surface, html:has(body.is-surface) { background: #9cc7ea; }
   body.is-surface .vignette { background: radial-gradient(ellipse at 50% 46%, transparent 55%, rgba(30, 50, 80, .22) 100%); }
   #hover-frame { display: none; }

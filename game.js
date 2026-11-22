@@ -1,5 +1,5 @@
 // @ts-check
-// D&K: Dungeons and Knowledge. startGame() puts the game's screen into `el` and starts it (dungeon.js, which
+// D&K: Dungeons and Knowledge. startGame() puts the game's screen into `el` and starts it (game/main.js, which
 // finds its parts by id). Opened alone it runs from index.html; inside LevAcademy from academy-app.js.
 
 export const FONTS = 'https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=Rubik:wght@500;700&display=swap';
@@ -12,15 +12,18 @@ const MARKUP = `
 
 <div class="hud">
   <div class="left">
+    <div class="pill fps" id="fps">fps</div>
     <div class="pill"><i class="coin"></i>Жълтици <b id="purse">0</b></div>
   </div>
   <div class="right">
     <button id="stone" type="button" hidden></button>
     <button id="style" type="button" hidden>Вид: гладки кубчета</button>
     <button id="inv-open" type="button">Инвентар (Tab)</button>
+    <button id="settings-open" type="button">Настройки</button>
     <button id="to-hero" type="button" hidden>Към героя</button>
   </div>
 </div>
+<canvas id="minimap" aria-hidden="true"></canvas>
 <div class="hint" id="hint"></div>
 <div class="actions" id="actions"></div>
 <div class="panel" role="dialog" aria-live="polite">
@@ -69,6 +72,11 @@ const MARKUP = `
   </div>
   <div class="row"><button class="plain" id="inv-close" type="button">Затвори (Tab)</button></div>
 </section>
+<section class="task settings" id="settings">
+  <h2>Настройки</h2>
+  <div id="settings-list"></div>
+  <div class="row"><button class="plain" id="settings-close" type="button">Затвори (Esc)</button></div>
+</section>
 <div class="held" id="held" hidden><img alt=""><span></span></div>
 
 `;
@@ -76,5 +84,5 @@ const MARKUP = `
 /** @param {HTMLElement} el */
 export async function startGame(el) {
   el.innerHTML = MARKUP;
-  await import('./dungeon.js');
+  await import('./game/main.js');
 }

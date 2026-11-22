@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"G=/Users/nikolay.aleksandrenko/ltfb/projects/lev-academy/games/dungeons-and-knowledge; cd $G/tests && python3 - <<'EOF'\\np='smoke.test.mjs'; s=open(p).read()\\na=\\\"assert.notEqual(d.start.c...",
-  "error": "Exit code 1\n37 modules parse\nnode:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: the door is still open\n\n121 !== 223\n\n    at file:///Users/nikolay.aleksandrenko/ltfb/projects/lev-academy/games/dungeons-and-knowledge/tests/smoke.test.mjs:61:8\n    at ModuleJob.run (node:internal/modules/esm/module_job:437:25)\n    at async node:internal/modules/esm/loader:639:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\n...",
-  "timestamp": "2026-11-22T18:20:29.141Z",
-  "retry_count": 2
-}

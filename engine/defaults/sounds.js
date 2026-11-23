@@ -1,5 +1,5 @@
 // @ts-check
-// What the game sounds like: every sound is a few tones and bursts of noise from the engine's audio.js.
+// What a game sounds like by default: every sound is a few tones and bursts of noise from the engine's audio.js.
 // The air of the place (a hum and drips below; wind and birds above), the torches and the water by how near
 // they are, steps by what is underfoot, and one sound for each thing that happens.
 

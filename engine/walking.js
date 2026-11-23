@@ -223,8 +223,10 @@ export function createWalker({ scene, rig, tileY, walkable, groundCost, stepSeco
 
     w.tile = walk.next;
     const passed = walk.passed ?? 0;                           // the footprints he has walked over
-    markers[passed * 2].visible = false;
-    markers[passed * 2 + 1].visible = false;
+    if (markers[passed * 2]) {                                 // a path longer than the footprints there are has none further on
+      markers[passed * 2].visible = false;
+      markers[passed * 2 + 1].visible = false;
+    }
     walk.passed = passed + 1;
     onTile?.(w.tile);
     walk.from = walk.to;

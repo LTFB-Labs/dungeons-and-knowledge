@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Редактор на карти</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=Rubik:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+  <header class="bar">
+    <h1>Редактор на карти</h1>
+    <label class="pick">Карта <select id="map-pick"></select></label>
+    <div class="group">
+      <button id="undo" type="button" title="Ctrl+Z">Отмени</button>
+      <button id="redo" type="button" title="Ctrl+Shift+Z">Върни</button>
+    </div>
+    <div class="group">
+      <button id="view-mode" type="button" title="V">Изглед: като в играта</button>
+      <button id="fit" type="button" title="F">Цялата карта</button>
+    </div>
+    <span class="status" id="status" aria-live="polite"></span>
+    <div class="group end">
+      <button id="save" class="is-main" type="button" title="Ctrl+S">Запази</button>
+      <button id="download" type="button">Изтегли</button>
+      <button id="play" class="is-go" type="button">Играй</button>
+    </div>
+  </header>
+
+  <aside class="sheet" id="left">
+    <section>
+      <h2>Инструмент</h2>
+      <div class="tools" id="tools"></div>
+      <p class="note" id="tool-note"></p>
+    </section>
+    <section id="blocks-box">
+      <h2>Рисува върху</h2>
+      <div class="choice" id="target">
+        <label><input type="radio" name="target" value="blocks" checked> Кубчета</label>
+        <label><input type="radio" name="target" value="regions"> Райони</label>
+      </div>
+      <div id="levels-box">
+        <h2>Ниво</h2>
+        <div class="levels" id="levels"></div>
+        <label class="check"><input type="checkbox" id="up-to"> Покажи само до това ниво</label>
+        <label class="check"><input type="checkbox" id="fade" checked> Долните нива избледнели</label>
+        <div class="row">
+          <button type="button" id="level-above">+ ниво отгоре</button>
+          <button type="button" id="level-below">+ ниво отдолу</button>
+        </div>
+      </div>
+      <h2 id="palette-title">Кубчета</h2>
+      <div class="palette" id="palette"></div>
+    </section>
+    <section id="kinds-box" hidden>
+      <h2>Вид на новото нещо</h2>
+      <div class="kinds" id="kinds"></div>
+    </section>
+    <section>
+      <h2>Карта</h2>
+      <p class="note" id="size"></p>
+      <div class="grow" id="grow">
+        <button type="button" data-side="top" title="Два реда отгоре">+ горе</button>
+        <button type="button" data-side="left" title="Две колони отляво">+ ляво</button>
+        <button type="button" data-side="right" title="Две колони отдясно">+ дясно</button>
+        <button type="button" data-side="bottom" title="Два реда отдолу">+ долу</button>
+      </div>
+      <label class="check"><input type="checkbox" id="show-tiles" checked> Покажи затворените плочки</label>
+      <label class="check"><input type="checkbox" id="lamp"> Допълнителна светлина</label>
+      <label class="check"><input type="checkbox" id="textured" checked> Текстури</label>
+    </section>
+  </aside>
+
+  <main id="stage">
+    <canvas id="scene"></canvas>
+    <div id="marks"></div>
+    <div class="hint" id="hint"></div>
+    <div class="trouble" id="trouble" hidden></div>
+  </main>
+
+  <aside class="sheet" id="right">
+    <section id="spawn-box" hidden>
+      <h2>Къде застава героят</h2>
+      <div id="spawns"></div>
+    </section>
+    <section id="thing-box" hidden>
+      <h2 id="thing-title">Нещо</h2>
+      <div id="thing-form"></div>
+    </section>
+    <section>
+      <h2>Неща на картата</h2>
+      <ol class="things" id="things"></ol>
+    </section>
+  </aside>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

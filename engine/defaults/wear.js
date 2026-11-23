@@ -1,7 +1,7 @@
 // @ts-check
-// How the items look on the hero. What is worn is a set of slightly larger boxes over his parts, shown only
+// How the default items (items.js) look on the hero. What is worn is a set of slightly larger boxes over his parts, shown only
 // while that item is on (rig.worn); what is held is a small model in his hand.
-import * as THREE from '../engine/three.js';
+import * as THREE from '../three.js';
 import { MOSS } from './blocks.js';
 import {
   SKIN, TUNIC, TUNIC_LIGHT, TUNIC_DARK, SCARF, SCARF_DARK, LEATHER, BUCKLE, TROUSERS, TROUSERS_LIGHT, BOOT, BOOT_LIGHT,

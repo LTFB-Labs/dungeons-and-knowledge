@@ -1,115 +1,29 @@
 // @ts-check
-// The things of the two maps, by kind: lights, torches, the stream, the guardian and his door, the chests,
-// barrels, crystals, the cave door... A map lists its things (maps/*.js); each kind is built here from boxes.
-// A builder gets the thing's entry from the map and may give back { object, bounds, ... } for main.js;
-// what moves every frame is pushed into `updates`.
+// The kinds of things that need code: lights, the stream, the guardian and his door, the chests, crystals, the
+// cave door... (The kinds that are plain data are in kinds/.) A map lists its things (maps/*.js); each kind here
+// is a builder: it gets the thing's entry from the map and may give back { object, ... } for the engine;
+// what moves every frame is given to `every`.
 import * as THREE from '../engine/three.js';
 import { box, glow } from '../engine/boxes.js';
 import { paint } from '../engine/textures.js';
 import { mulberry32, whole } from '../engine/random.js';
-import { key } from '../engine/map.js';
 import { M, PETALS } from './materials.js';
+import { LIGHT_KINDS } from '../engine/defaults/lights.js';
 import { STONE, MOSS } from './blocks.js';
 
-/**
- * @param {object} g
- * @param {any} g.scene
- * @param {() => number} g.rand the dice of the things
- * @param {Function} g.paintedBox
- * @param {any} g.level from loadMap
- * @param {any} g.world
- * @param {any} g.fog
- * @param {any} g.state what has happened so far: doorOpen, chestOpen, chestShake, chest2Seen, chest2Open, caveDoorOpen, here, closeUp
- * @param {any} g.hero the hero's group (set before the first frame)
- * @param {(material: any) => void} [g.wet] called with the material of open water, so the game can make it shine
- * @returns {{ build: Record<string, Function>, fields: Record<string, Function>, updates: Function[], torches: any[], falls: number[][] }}
- *   torches: every torch (`at`: where its light is; `base`: how strong it burns, 0 when out); falls: the foot of each waterfall
- */
-export function makeProps(g) {
-  const { scene, rand, paintedBox, state } = g;
-  const updates = [];                 // (t, dt) => {}: called every frame, in this order
-  const every = (update) => updates.push(update);
+const WATER_LOOK = { shine: 1.6, gloss: 40, glint: true };
 
-  // Torches flicker, each with its own phase.
-  const flickers = [];   // { light, base, halo, haloBase, flame, phase }
+/**
+ * @param {any} g the stage of the engine's things (engine/things.js): scene, rand (the dice of the things),
+ *   paintedBox, level, world, fog, shading, every, build, reveal, hero (set before the first frame), and
+ *   state: what has happened so far (doorOpen, chestOpen, chestShake, chest2Seen, chest2Open, caveDoorOpen, here, closeUp)
+ * @param {{ above: boolean }} o above: the map is above ground (clouds pass over its water)
+ * @returns {{ kinds: Record<string, Function>, fields: Record<string, Function>, falls: number[][] }}
+ *   falls: the foot of each waterfall
+ */
+export function makeProps(g, { above }) {
+  const { scene, rand, paintedBox, state, every } = g;
   const falls = [];      // [x, y, z]: the foot of each waterfall
-  every((t) => {
-    for (const f of flickers) {
-      const n = 0.86 + 0.09 * Math.sin(t * 11 + f.phase) + 0.05 * Math.sin(t * 23.7 + f.phase * 2);
-      f.light.intensity = f.base * n;
-      f.halo.material.opacity = f.haloBase * n;
-      f.flame.scale.set(1, 0.9 + 0.25 * Math.sin(t * 13 + f.phase), 1);
-      f.flame.rotation.y = t * 1.7 + f.phase;
-    }
-  });
-  // The torches nearest the hero cast real shadows. A light with shadows draws the whole scene from six sides
-  // every frame, so there are only SHADOW_TORCHES of them: they go to the nearest lit torches and shine in place
-  // of those torches' own lights. Their number never changes, because a change in the number of lights would
-  // rebuild every material; how many of them cast shadows changes only with the setting (torchShadows), and that
-  // rebuilds the materials once. A torch keeps its caster until another is clearly nearer, so shadows do not jump about.
-  const SHADOW_TORCHES = 2;
-  const casters = Array.from({ length: SHADOW_TORCHES }, () => {
-    const light = new THREE.PointLight(0xffc089, 0, 9, 2);
-    light.castShadow = true;
-    light.shadow.mapSize.set(512, 512);
-    light.shadow.camera.near = 0.1;
-    light.shadow.camera.far = 9;
-    light.shadow.bias = -0.002;
-    light.shadow.normalBias = 0.04;
-    scene.add(light);
-    return { light, torch: null };
-  });
-  /** How many of the nearest torches cast shadows (0 to SHADOW_TORCHES), and how big their shadow maps are. */
-  function torchShadows(count, size) {
-    casters.forEach((c, k) => {
-      c.light.castShadow = k < count;
-      if (c.light.shadow.mapSize.x !== size) {
-        c.light.shadow.mapSize.set(size, size);
-        c.light.shadow.map?.dispose();                 // made again at the new size
-        c.light.shadow.map = null;
-      }
-    });
-  }
-  every(() => {
-    const here = g.hero?.position;
-    if (!here) return;
-    for (const f of flickers) f.dist = f.base > 0 ? f.at.distanceTo(here) - (f.casting ? 1 : 0) : Infinity;
-    for (const c of casters) { if (c.torch) c.torch.casting = false; c.torch = null; }
-    for (const c of casters) {
-      let best = null;
-      for (const f of flickers) if (!f.casting && f.dist < 9 && (!best || f.dist < best.dist)) best = f;
-      if (best) { best.casting = true; c.torch = best; }
-    }
-    for (const c of casters) {
-      if (!c.torch) { c.light.intensity = 0; continue; }
-      c.light.position.copy(c.torch.at);
-      c.light.intensity = c.torch.light.intensity;
-      c.light.distance = c.torch.light.distance;
-      c.torch.light.intensity = 0;
-    }
-  });
-  function torch(x, y, z, leanX, leanZ, power = 1) {
-    const g = new THREE.Group();
-    g.position.set(x, y, z);
-    const stick = box(g, 0.09, 0.42, 0.09, M.woodDark, 0, -0.16, 0);
-    stick.rotation.set(leanZ * 0.5, 0, -leanX * 0.5);
-    box(g, 0.2, 0.08, 0.2, M.iron, leanX * 0.08, 0.06, leanZ * 0.08);
-    const flame = new THREE.Group();
-    flame.position.set(leanX * 0.1, 0.22, leanZ * 0.1);
-    box(flame, 0.2, 0.24, 0.2, M.flame);
-    box(flame, 0.11, 0.16, 0.11, M.flameCore, 0, 0.12, 0);
-    g.add(flame);
-    const light = new THREE.PointLight(0xffc089, 6.5 * power, 9, 2);
-    light.position.set(leanX * 0.9, 0.35, leanZ * 0.9);
-    g.add(light);
-    const halo = glow(g, 0xff7a28, 1.8, 0.08, leanX * 0.2, 0.25, leanZ * 0.2);
-    scene.add(g);
-    const flicker = { light, base: 6.5 * power, halo, haloBase: 0.08, flame, phase: rand() * 10, strength: 6.5 * power,
-      at: new THREE.Vector3(x + leanX * 0.9, y + 0.35, z + leanZ * 0.9), dist: Infinity, casting: false };      // `at`: where its light is
-    flickers.push(flicker);
-    g.userData.flicker = flicker;
-    return g;
-  }
 
   // Markers that say "this can be opened": they bob and turn (each with its own phase k), and hide during a close-up.
   function beacon(material, x, y, z, k, gone = () => false) {
@@ -122,33 +36,9 @@ export function makeProps(g) {
     });
   }
 
-  const build = {
+  const kinds = {
     // ---------- light ----------
-    caveLight() {
-      scene.add(new THREE.HemisphereLight(0xd6dce6, 0x4a443a, 1.45));
-      const fill = new THREE.DirectionalLight(0xb4bfce, 0.65);   // lifts the faces that look left
-      fill.position.set(2, 6, 16);
-      scene.add(fill);
-      const moon = new THREE.DirectionalLight(0xe6ecf7, 1.25);
-      moon.position.set(15, 11, 1);
-      moon.target.position.set(4, 0, 4);
-      moon.castShadow = true;
-      moon.shadow.mapSize.set(2048, 2048);
-      Object.assign(moon.shadow.camera, { left: -13, right: 13, top: 13, bottom: -13, near: 1, far: 45 });
-      moon.shadow.bias = -0.0006;
-      moon.shadow.normalBias = 0.03;
-      scene.add(moon, moon.target);
-      // Its shadows cover 13 tiles round the hero, wherever he goes (not only the first room). The point it looks at
-      // moves in half-tile steps, so the shadow edges do not crawl while he walks.
-      every(() => {
-        const at = g.hero?.position;
-        if (!at) return;
-        const x = Math.round(at.x * 2) / 2;
-        const z = Math.round(at.z * 2) / 2;
-        moon.position.set(x + 11, 11, z - 3);
-        moon.target.position.set(x, 0, z);
-      });
-    },
+    ...LIGHT_KINDS(g),               // caveLight: the engine's default light under ground
     dayLight() {
       scene.add(new THREE.HemisphereLight(0xdcecff, 0x6b5a3a, 1.5));
       const surfaceSun = new THREE.DirectionalLight(0xfff0d8, 2.3);
@@ -166,21 +56,6 @@ export function makeProps(g) {
         surfaceSun.position.set(at.x + 12, 18, at.z + 3);
         surfaceSun.target.position.set(at.x, 0, at.z);
       });
-    },
-    // A torch on a wall. onlyIn: its light is seen only from inside that region, once the cell `seen` has been seen.
-    // take(): it is taken off the wall (gone, and its light out).
-    torch({ at: [x, y, z], lean: [leanX, leanZ], power = 1, onlyIn, seen }) {
-      const group = torch(x, y, z, leanX, leanZ, power);
-      const flicker = group.userData.flicker;
-      let taken = false;
-      if (onlyIn) {
-        every(() => {
-          const litNow = !taken && state.here === onlyIn && g.fog.seen.has(key(seen[0], seen[1]));
-          group.children.forEach((child) => { if (!child.isLight) child.visible = litNow; });
-          flicker.base = litNow ? flicker.strength : 0;
-        });
-      }
-      return { object: group, take() { taken = true; group.visible = false; flicker.base = 0; } };
     },
     // Daylight comes down through a hole in the roof and lands on the garden.
     sunShaft({ from, to }) {
@@ -266,7 +141,7 @@ export function makeProps(g) {
       const waterMaterial = new THREE.MeshLambertMaterial({
         map: waterTexture, transparent: true, opacity: 0.88, emissive: 0x245876, emissiveIntensity: 0.22,
       });
-      g.wet?.(waterMaterial);
+      g.shading.dress(waterMaterial, { ...WATER_LOOK, clouds: above });
       WATER.forEach(([i, j]) => {
         const surface = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), waterMaterial);
         surface.rotation.x = -Math.PI / 2;
@@ -427,7 +302,7 @@ export function makeProps(g) {
     },
     // A plain chest with no lock and no task: hollow, so what lies in it is seen. `shownIn`: it shows once the
     // hero has been in that region. It gives contents(ids): shows the things that are still in it.
-    chest({ at: [x, y, z], shownIn }) {
+    chest({ id, at: [x, y, z], shownIn }) {
       const chest2 = new THREE.Group();
       chest2.position.set(x, y, z);
       const darkWood = (g) => {
@@ -491,38 +366,14 @@ export function makeProps(g) {
       const chest2Skins = [];
       chest2.traverse((node) => { if (node.isMesh) chest2Skins.push(node.material); });
       every((t, dt) => {
-        if (state.here === shownIn && !state.chest2Seen) { state.chest2Seen = true; g.onSeen?.(); }
+        if (state.here === shownIn && !state.chest2Seen) { state.chest2Seen = true; g.reveal?.(id); }
         chest2.visible = state.chest2Seen;
         const lightNow = g.world.regionLight[shownIn];           // as dim as the chamber it stands in
         chest2Skins.forEach((material) => material.color.setScalar(lightNow));
         lid2.rotation.x += ((state.chest2Open ? -1.9 : 0) - lid2.rotation.x) * (1 - Math.exp(-dt * 5));
       });
-      return { object: chest2, contents: showChestContents };
-    },
-    coins({ at: [x, y, z] }) {
-      for (let k = 0; k < 16; k++) {
-        const s = 0.1 + rand() * 0.06;
-        const coin = box(scene, s, s * 0.6, s, M.gold, x + (rand() - 0.5) * 0.6, y + s * 0.3 + (k % 3) * 0.06, z + (rand() - 0.5) * 0.5);
-        coin.rotation.y = rand() * 3;
-      }
-      glow(scene, 0xffb62e, 1.3, 0.08, x, y + 0.2, z);
-    },
-    banner({ at: [x, y, z] }) {
-      box(scene, 0.72, 1.2, 0.05, M.cloth, x, y, z);
-      box(scene, 0.26, 0.26, 0.06, M.gold, x, y + 0.15, z + 0.02).rotation.z = Math.PI / 4;
-      box(scene, 0.86, 0.08, 0.09, M.woodDark, x, y + 0.63, z + 0.01);
-    },
-    barrel({ at: [i, j] }) {
-      const group = new THREE.Group();
-      group.position.set(i, 0, j);
-      box(group, 0.58, 0.74, 0.58, M.wood, 0, 0.37, 0);
-      box(group, 0.62, 0.08, 0.62, M.iron, 0, 0.18, 0);
-      box(group, 0.62, 0.08, 0.62, M.iron, 0, 0.56, 0);
-      scene.add(group);
-    },
-    crates({ at: [i, j] }) {
-      box(scene, 0.7, 0.7, 0.7, M.wood, i, 0.35, j);
-      box(scene, 0.46, 0.46, 0.46, M.woodDark, i - 0.05, 0.93, j + 0.02).rotation.y = 0.4;
+      // open(): its lid goes up and stays up; marked(): it is on the small map once it has been seen
+      return { object: chest2, contents: showChestContents, open() { state.chest2Open = true; }, marked: () => state.chest2Seen };
     },
     // Glowing crystals: spikes are [x, z, height, width].
     crystals({ spikes, light, halo }) {
@@ -584,8 +435,8 @@ export function makeProps(g) {
         box(caveDoor, 0.04, 1.94, 0.16, M.dark, 0, 0.97, 0.01);
         box(caveDoor, 0.22, 0.28, 0.1, M.gold, 0.25, 1.0, 0.09);
         scene.add(caveDoor);
-      torch(x - 0.72, 1.5, z + 0.55, 0, 1, 0.5);
-      torch(x + 0.72, 1.5, z + 0.55, 0, 1, 0.5);
+      g.build({ kind: 'torch', at: [x - 0.72, 1.5, z + 0.55], lean: [0, 1], power: 0.5 });
+      g.build({ kind: 'torch', at: [x + 0.72, 1.5, z + 0.55], lean: [0, 1], power: 0.5 });
       every((t, dt) => { caveDoor.position.y += ((state.caveDoorOpen ? -2.1 : 0) - caveDoor.position.y) * (1 - Math.exp(-dt * 3)); });
       return { object: caveDoor };
     },
@@ -623,5 +474,5 @@ export function makeProps(g) {
       PETALS.forEach((material, k) => batch(material, petals[k], ([x, z]) => ({ position: new THREE.Vector3(x, 0.23, z), scale: new THREE.Vector3(0.11, 0.09, 0.11) })));
     },
   };
-  return { build, fields, updates, torches: flickers, falls, torchShadows };
+  return { kinds, fields, falls };
 }

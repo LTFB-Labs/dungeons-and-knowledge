@@ -11,6 +11,7 @@
 //   E  rough dark stone (the foot of a wall, the deep)      S  dressed stone (wall tops, the landing)
 //   R  soil          /  a low step of dressed stone (half a block)             .  nothing
 import { DUNGEON_ROLLS } from './dungeon-rolls.js';
+import { TEXT } from '../texts.js';
 
 const WATER = [[1, 6], [1, 7], [2, 7], [2, 8], [2, 9]];      // a stream that runs off the edge
 
@@ -395,26 +396,30 @@ export const DUNGEON = {
   backdrop: 'cave',
   start: { tile: [8, 6], facing: Math.PI },                 // faces the door
   arrivals: { 'from-surface': { tile: [-9, 5], facing: 0 } },      // came down the stairs
-  // The things, in the order they are made (the dice are rolled in this order). See game/props.js for each kind.
+  // The things, in the order they are made (the dice are rolled in this order). The kinds are in game/kinds/ (data)
+  // and game/props.js (code). `take`: it can be taken (the items go into the bag); `box`: it holds a box like the
+  // bag; `travel`: it leads to another map; `mark`: its colour on the small map.
   things: [
     { kind: 'tufts' },                                       // blades of grass and a few flowers on the grass
     { kind: 'rubble', stones: [[7.62, 4.5, 0.2], [6.5, 4.42, 0.14], [7.4, 3.38, 0.16], [6.62, 3.7, 0.1]] },      // by the pillar
     { kind: 'caveLight' },
     { kind: 'torch', at: [-0.36, 1.8, 3], lean: [1, 0] },
     { kind: 'torch', id: 'torch', at: [4, 1.8, -0.36], lean: [0, 1],                                    // by the guardian's door: this one can be taken
-      tiles: [[4, -1]], front: [4, 0], focus: [4, 1.5, -0.2], zoom: 2.6, hit: [0.5, 0.8, 0.5, 4, 1.8, -0.3] },
+      tiles: [[4, -1]], front: [4, 0], focus: [4, 1.5, -0.2], zoom: 2.6, hit: [0.5, 0.8, 0.5, 4, 1.8, -0.3],
+      take: { items: ['torch'], title: TEXT.torchTitle, text: TEXT.torchText, button: TEXT.torchTake, done: TEXT.takenToBag, empty: TEXT.torchEmpty } },
     { kind: 'torch', at: [7, 1.8, -0.36], lean: [0, 1] },
     { kind: 'torch', at: [10, 1.35, -0.36], lean: [0, 1] },
     { kind: 'torch', at: [-8, 1.8, 2.64], lean: [0, 1], power: 0.6 },                                  // in the hall to the west
     { kind: 'torch', at: [0.64, 1.8, -8], lean: [1, 0], power: 0.6, onlyIn: 'north', seen: [0, -8] },   // in the chamber behind the door
     { kind: 'stream', tiles: WATER, falls: [2, 9], blocks: WATER },
     { kind: 'sunShaft', from: [-2.6, 10, 9.8], to: [1, 0, 6.4] },      // daylight through a hole in the roof, onto the garden
-    { kind: 'guardian', id: 'door', at: [5.5, 0.1], door: [5.5, -0.8], aside: 7.5,
+    { kind: 'guardian', id: 'door', at: [5.5, 0.1], door: [5.5, -0.8], aside: 7.5, mark: '#b07cff',
       tiles: [[5, 0], [6, 0]], front: [5, 1], focus: [5.5, 1.25, 0.35], zoom: 2.2, hit: [2.2, 3.0, 1.4, 5.5, 1.5, -0.2],
       blocks: [[5, 0], [6, 0]], gate: [[5, -1], [6, -1]], asideBlocks: [[7, 0], [8, 0]], opens: 'north' },
-    { kind: 'taskChest', id: 'chest', at: [1, 0.5, 0],
+    { kind: 'taskChest', id: 'chest', at: [1, 0.5, 0], mark: '#ffc94a',
       tiles: [[1, 0]], front: [1, 1], focus: [1, 0.95, 0.45], zoom: 2.3, hit: [1.1, 1.5, 0.9, 1, 1.15, 0], blocks: [[1, 0]] },
-    { kind: 'chest', id: 'chest2', at: [6, 0, -8], shownIn: 'north',
+    { kind: 'chest', id: 'chest2', at: [6, 0, -8], shownIn: 'north', mark: '#ffc94a',
+      hidden: true, box: { title: TEXT.chest2Title, text: TEXT.chest2Text, lift: 0.3 },      // it joins what can be tapped once it has been seen
       tiles: [[6, -8]], front: [6, -7], focus: [6, 0.55, -7.65], zoom: 2.3, hit: [1.0, 1.0, 0.8, 6, 0.5, -8], blocks: [[6, -8]] },
     { kind: 'coins', at: [2, 0.5, 0], blocks: [[2, 0]] },
     { kind: 'banner', at: [1, 2.05, -0.46] },
@@ -423,7 +428,7 @@ export const DUNGEON = {
     { kind: 'crates', at: [11, 1], blocks: [[11, 1]] },
     { kind: 'crystals', spikes: [[0, 7.1, 0.9, 0.26], [0.32, 7.5, 0.55, 0.2], [-0.12, 7.75, 1.25, 0.3], [0.3, 8.05, 0.4, 0.18], [0.02, 6.72, 0.36, 0.16]],
       light: [0.5, 0.9, 7.5], halo: [0.1, 0.7, 7.5], blocks: [[0, 7], [0, 8]] },
-    { kind: 'stairs', id: 'stairs', travel: 'surface', glow: [-9, 1.5, 2.2],
+    { kind: 'stairs', id: 'stairs', travel: 'surface', glow: [-9, 1.5, 2.2], mark: '#e6f4ff',
       tiles: [[-9, 4], [-9, 3]], front: [-9, 5], focus: [-9, 1, 3], hit: [1.0, 1.9, 2.9, -9, 0.95, 3.05], bounds: [[-9.5, 0, 1.5], [-8.5, 2, 4.5]] },
     // Three empty rooms to explore (added after the rest, so the dice above roll as before):
     // the crypt and the gallery lie behind the guardian's door, the storeroom beyond the west hall.
@@ -431,7 +436,7 @@ export const DUNGEON = {
     { kind: 'torch', at: [4, 1.8, -20.36], lean: [0, 1], power: 0.6, onlyIn: 'north', seen: [4, -20] },       // the gallery
     { kind: 'torch', at: [8, 1.8, -20.36], lean: [0, 1], power: 0.6, onlyIn: 'north', seen: [8, -20] },
     { kind: 'torch', at: [-21, 1.8, 2.64], lean: [0, 1], power: 0.6 },                                         // the storeroom
-    // Goblins (game/goblins.js): in the gallery, round a camp fire; in the storeroom, one counting a heap of coins.
+    // Goblins (game/kinds/goblins.js): in the gallery, round a camp fire; in the storeroom, one counting a heap of coins.
     { kind: 'campfire', at: [6, -18], region: 'north', tile: [6, -18], blocks: [[6, -18]] },
     { kind: 'goblin', id: 'goblin1', tiles: [[5, -18]], front: [5, -17], focus: [5, 0.6, -18], zoom: 2.6, hit: [0.7, 1.0, 0.7, 5, 0.5, -18], at: [5, -18], facing: Math.PI / 2, pose: 'warm', region: 'north', tile: [5, -18], blocks: [[5, -18]] },
     { kind: 'goblin', id: 'goblin2', tiles: [[7, -18]], front: [7, -17], focus: [7, 0.6, -18], zoom: 2.6, hit: [0.7, 1.0, 0.7, 7, 0.5, -18], at: [7, -18], facing: -Math.PI / 2, pose: 'poke', region: 'north', tile: [7, -18], blocks: [[7, -18]] },
@@ -444,7 +449,8 @@ export const DUNGEON = {
     // Suits of armour round the throne: two on the dais either side of it, two in front of the dais. The royal one can be taken.
     { kind: 'armorStand', at: [-26, 0.5, -21], facing: Math.PI / 2, suit: 'iron', region: 'north', tile: [-26, -21], blocks: [[-26, -21]] },
     { kind: 'armorStand', id: 'armor', at: [-26, 0.5, -17], facing: Math.PI / 2, suit: 'royal', region: 'north', tile: [-26, -17], blocks: [[-26, -17]],
-      tiles: [[-26, -17]], front: [-25, -17], focus: [-26, 1.4, -17], zoom: 2.4, hit: [0.8, 1.9, 0.8, -26, 1.45, -17] },
+      tiles: [[-26, -17]], front: [-25, -17], focus: [-26, 1.4, -17], zoom: 2.4, hit: [0.8, 1.9, 0.8, -26, 1.45, -17],
+      take: { items: ['royalHelmet', 'royalChest', 'royalLegs', 'royalBoots'], title: TEXT.armorTitle, text: TEXT.armorText, button: TEXT.armorTake, done: TEXT.armorTaken, empty: TEXT.armorEmpty } },
     { kind: 'armorStand', at: [-23, 0, -22], facing: 0, suit: 'rusty', region: 'north', tile: [-23, -22], blocks: [[-23, -22]] },
     { kind: 'armorStand', at: [-23, 0, -16], facing: Math.PI, suit: 'iron', region: 'north', tile: [-23, -16], blocks: [[-23, -16]] },
     // Spears: two flank the front of the throne on the dais, two stand at the corners of the dais. The nearest can be taken.
@@ -452,7 +458,8 @@ export const DUNGEON = {
     { kind: 'spear', at: [-25, 0.5, -18], region: 'north', tile: [-25, -18], blocks: [[-25, -18]] },
     { kind: 'spear', at: [-24, 0, -21], region: 'north', tile: [-24, -21], blocks: [[-24, -21]] },
     { kind: 'spear', id: 'spear', at: [-24, 0, -17], region: 'north', tile: [-24, -17], blocks: [[-24, -17]],
-      tiles: [[-24, -17]], front: [-23, -17], focus: [-24, 1.4, -17], zoom: 2.3, hit: [0.6, 2.4, 0.6, -24, 1.2, -17] },
+      tiles: [[-24, -17]], front: [-23, -17], focus: [-24, 1.4, -17], zoom: 2.3, hit: [0.6, 2.4, 0.6, -24, 1.2, -17],
+      take: { items: ['spear'], title: TEXT.spearTitle, text: TEXT.spearText, button: TEXT.spearTake, done: TEXT.takenToBag, empty: TEXT.spearEmpty } },
     { kind: 'torch', at: [-26.36, 2.2, -21.5], lean: [1, 0], power: 0.7, onlyIn: 'north', seen: [-26, -21] },    // either side of the throne
     { kind: 'torch', at: [-26.36, 2.2, -16.5], lean: [1, 0], power: 0.7, onlyIn: 'north', seen: [-26, -17] },
     { kind: 'torch', at: [-20.5, 1.8, -24.36], lean: [0, 1], power: 0.6, onlyIn: 'north', seen: [-20, -24] },    // along the far wall
@@ -461,7 +468,8 @@ export const DUNGEON = {
     // Shields on the walls, each with two swords crossed behind it.
     { kind: 'shield', at: [-23.5, 2.0, -24.42], facing: 0, colours: ['#9e1f24', '#e3ac2a'], region: 'north', tile: [-23, -24] },
     { kind: 'shield', id: 'shield', at: [-16.5, 2.0, -24.42], facing: 0, colours: ['#2c4f8f', '#c9ced6'], region: 'north', tile: [-16, -24],     // this one can be taken
-      tiles: [[-16, -25]], front: [-16, -24], focus: [-16.5, 1.6, -24.1], zoom: 2.4, hit: [0.8, 0.9, 0.4, -16.5, 2.0, -24.35] },
+      tiles: [[-16, -25]], front: [-16, -24], focus: [-16.5, 1.6, -24.1], zoom: 2.4, hit: [0.8, 0.9, 0.4, -16.5, 2.0, -24.35],
+      take: { items: ['shield'], title: TEXT.shieldTitle, text: TEXT.shieldText, button: TEXT.shieldTake, done: TEXT.takenToBag, empty: TEXT.shieldEmpty } },
     { kind: 'shield', at: [-8.5, 2.0, -24.42], facing: 0, colours: ['#2f6b3a', '#e3ac2a'], region: 'north', tile: [-8, -24] },
     { kind: 'shield', at: [-26.42, 2.3, -23.5], facing: Math.PI / 2, colours: ['#2c4f8f', '#e3ac2a'], region: 'north', tile: [-26, -23] },
     { kind: 'shield', at: [-26.42, 2.3, -14.5], facing: Math.PI / 2, colours: ['#9e1f24', '#c9ced6'], region: 'north', tile: [-26, -15] },

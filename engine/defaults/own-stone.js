@@ -1,5 +1,5 @@
-// Our own stone, painted by code in the spirit of the pixel stone the owner liked (stone-sample.js, which is
-// someone else's art and stays private): a few warm grey shades, rough rubble next to dressed blocks of mixed
+// Our own stone, painted by code in the spirit of a pixel stone the owner liked (someone else's art, which
+// stays private): a few warm grey shades, rough rubble next to dressed blocks of mixed
 // sizes, a light top edge and a dark bottom edge on every stone, chisel strokes, carved slabs, and moss hanging
 // from the joints. Every tile is 16 × 16 and repeats without a seam. Same shape as SAMPLE: { pale: { name: rows } }.
 

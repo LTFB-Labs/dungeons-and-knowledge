@@ -151,7 +151,7 @@ export const SURFACE = {
   // The things. What the map itself places (flowers, well, stall, sign, lamp) is made from its characters.
   things: [
     { kind: 'dayLight' },
-    { kind: 'caveDoor', id: 'cave', x: caveX, z: caveZ, travel: 'from-surface',
+    { kind: 'caveDoor', id: 'cave', x: caveX, z: caveZ, travel: 'from-surface', mark: '#e6f4ff',
       tiles: [[caveX, caveZ]], front: [caveX, caveZ + 1], focus: [caveX, 1, caveZ + 0.4], hit: [1.1, 2.0, 0.8, caveX, 1.0, caveZ + 0.2] },
   ],
 };

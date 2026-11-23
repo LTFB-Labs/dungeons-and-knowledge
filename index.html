@@ -14,10 +14,80 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=Rubik:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="game.css">
+  <!-- preload:start: every module the game loads, fetched at once (packages/blocks-engine/preload/preload.mjs) -->
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js">
+  <link rel="modulepreload" href="game.js">
+  <link rel="modulepreload" href="engine/defaults/page.js">
+  <link rel="modulepreload" href="game/main.js">
+  <link rel="modulepreload" href="engine/defaults/texts.js">
+  <link rel="modulepreload" href="engine/play.js">
+  <link rel="modulepreload" href="engine/map.js">
+  <link rel="modulepreload" href="engine/camera.js">
+  <link rel="modulepreload" href="engine/critters.js">
+  <link rel="modulepreload" href="engine/travel.js">
+  <link rel="modulepreload" href="engine/paper.js">
+  <link rel="modulepreload" href="game/texts.js">
+  <link rel="modulepreload" href="game/blocks.js">
+  <link rel="modulepreload" href="game/backdrop.js">
+  <link rel="modulepreload" href="engine/defaults/sounds.js">
+  <link rel="modulepreload" href="game/music.js">
+  <link rel="modulepreload" href="game/particles.js">
+  <link rel="modulepreload" href="game/critters.js">
+  <link rel="modulepreload" href="game/details.js">
+  <link rel="modulepreload" href="game/items.js">
+  <link rel="modulepreload" href="game/hero.js">
+  <link rel="modulepreload" href="engine/defaults/wear.js">
+  <link rel="modulepreload" href="game/kinds/index.js">
+  <link rel="modulepreload" href="game/paints.js">
+  <link rel="modulepreload" href="game/props.js">
+  <link rel="modulepreload" href="game/materials.js">
+  <link rel="modulepreload" href="game/chest-task-ui.js">
+  <link rel="modulepreload" href="game/guardian.js">
+  <link rel="modulepreload" href="game/maps/dungeon.js">
+  <link rel="modulepreload" href="game/maps/surface.js">
+  <link rel="modulepreload" href="engine/three.js">
+  <link rel="modulepreload" href="engine/random.js">
+  <link rel="modulepreload" href="engine/stage.js">
+  <link rel="modulepreload" href="engine/world.js">
+  <link rel="modulepreload" href="engine/fog.js">
+  <link rel="modulepreload" href="engine/effects.js">
+  <link rel="modulepreload" href="engine/shading.js">
+  <link rel="modulepreload" href="engine/settings.js">
+  <link rel="modulepreload" href="engine/minimap.js">
+  <link rel="modulepreload" href="engine/fps.js">
+  <link rel="modulepreload" href="engine/audio.js">
+  <link rel="modulepreload" href="engine/characters.js">
+  <link rel="modulepreload" href="engine/walking.js">
+  <link rel="modulepreload" href="engine/interaction.js">
+  <link rel="modulepreload" href="engine/inventory.js">
+  <link rel="modulepreload" href="engine/projectiles.js">
+  <link rel="modulepreload" href="engine/input.js">
+  <link rel="modulepreload" href="engine/things.js">
+  <link rel="modulepreload" href="engine/boxes.js">
+  <link rel="modulepreload" href="engine/defaults/blocks.js">
+  <link rel="modulepreload" href="engine/particles.js">
+  <link rel="modulepreload" href="engine/defaults/items.js">
+  <link rel="modulepreload" href="engine/defaults/hero.js">
+  <link rel="modulepreload" href="engine/defaults/kinds/index.js">
+  <link rel="modulepreload" href="engine/defaults/paints.js">
+  <link rel="modulepreload" href="engine/textures.js">
+  <link rel="modulepreload" href="engine/defaults/lights.js">
+  <link rel="modulepreload" href="engine/defaults/materials.js">
+  <link rel="modulepreload" href="game/chest-task.js">
+  <link rel="modulepreload" href="game/maps/dungeon-rolls.js">
+  <link rel="modulepreload" href="game/structures.js">
+  <link rel="modulepreload" href="engine/pathfinding.js">
+  <link rel="modulepreload" href="engine/expressions.js">
+  <link rel="modulepreload" href="engine/paints.js">
+  <link rel="modulepreload" href="engine/defaults/own-stone.js">
+  <link rel="modulepreload" href="engine/defaults/kinds/goblins.js">
+  <link rel="modulepreload" href="engine/defaults/kinds/hall.js">
+  <link rel="modulepreload" href="engine/defaults/kinds/store.js">
+  <!-- preload:end -->
 </head>
 <body>
   <!-- Opened alone. Inside LevAcademy academy-app.js starts the game instead. -->
-  <main id="game"><noscript>Играта има нужда от JavaScript.</noscript></main>
+  <main id="game"><div class="night is-on" id="night"><div class="loading"><span class="loading-blocks" aria-hidden="true"><i></i><i></i><i></i></span><b>Зареждане…</b></div></div><noscript>Играта има нужда от JavaScript.</noscript></main>
   <script type="module">
     import { startGame } from './game.js';
     startGame(document.getElementById('game'));

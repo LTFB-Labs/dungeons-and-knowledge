@@ -1,11 +1,12 @@
 // @ts-check
-// Everything the game says, in one place. Bulgarian only for now.
+// Everything the game says, in one place: what every game says (engine/defaults/texts.js) and D&K's own.
+// Bulgarian only for now.
+import { TEXT as COMMON, SETTINGS_TEXT as COMMON_SETTINGS } from '../engine/defaults/texts.js';
+
+export { INVENTORY_TEXT, SHOOT_TEXT } from '../engine/defaults/texts.js';
 
 export const TEXT = {
-  hint: 'Щракни плочка (двоен клик: бързо). Или ↑ напред, ← → завой, ↓ кръгом (Shift: бързо, E: отвори). Колелцето приближава.',
-  hintShoot: 'В ръката ти е нещо, което стреля: интервалът (или десен клик) стреля към показалеца.',
-  styleFlat: 'Вид: гладки кубчета',
-  styleTextured: 'Вид: с текстури',
+  ...COMMON,                      // the hint, the look button, the bag
   chestTitle: 'Сандъкът',
   chestText: 'Тук се отваря близкият екран със задачата: ключалка с колела.',
   doorTitle: 'Пазителят на вратата',
@@ -32,30 +33,15 @@ export const TEXT = {
   torchText: 'Факла на стената до пазителя. Свети и в ръка.',
   torchTake: 'Вземи факлата',
   torchEmpty: 'Тук гореше факла.',
-  takenToBag: 'В раницата е. Сложи го в ръка с Tab.',
-  bagFull: 'Няма достатъчно място в раницата.',
   chest2Text: 'Какво има в сандъка.',
   stone: 'Камък',
 };
 
-// The settings sheet: the name of each slider.
+// The settings sheet: the name of each slider; the engine's own, and the ones D&K adds.
 export const SETTINGS_TEXT = {
-  fov: 'Перспектива',
-  tilt: 'Наклон',
-  focus: 'Фокус',
-  pool: 'Светлина около героя',
-  shine: 'Блясък',
+  ...COMMON_SETTINGS,
   wind: 'Вятър и облаци',
   windNote: 'Само в горния свят',
-  patches: 'Петна',
-  torchShadows: 'Сенки от факли',
-  shadowSize: 'Размер на сенките',
-  map: 'Карта',
-  mapNote: 'Клавиш M',
-  fps: 'Брой кадри',
-  sound: 'Звуци',
-  music: 'Музика',
-  musicVolume: 'Сила на музиката',
   specks: 'Частици',
   critters: 'Животинки',
   details: 'Детайли',
@@ -87,19 +73,3 @@ export const TASK_NOTE = [
   { chip: 'c-desks' }, ' за щитове. Купихме и въжета, но мастилото се е разляло. В сандъка останаха ', { chip: 'c-left' }, '.',
 ];
 export const PART_LABEL = { computers: 'мечове', desks: 'щитове', mice: 'въжета', left: 'останали' };
-
-export const INVENTORY_TEXT = {
-  locale: 'bg-BG',
-  title: 'Инвентар',
-  placeFor: (spot) => `Място за ${spot}`,
-  inHand: 'Държи се в ръка',
-  wornOn: (spot) => `Носи се на: ${spot}`,
-  walk: (percent) => `Ходене: с ${percent} по-бързо`,
-  hurry: (percent) => `Бързане: с ${percent} по-бързо`,
-  light: (what) => `Свети: ${what}`,
-  wrongSlot: 'Това не става тук.',
-};
-export const SHOOT_TEXT = {
-  key: 'интервал',
-  shoots: (shooter) => `Стреля: ${shooter.name.toLowerCase()}, до ${shooter.range} плочки`,
-};
